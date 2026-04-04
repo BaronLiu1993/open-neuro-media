@@ -1,13 +1,9 @@
 .PHONY: setup dev build test clean
 
 setup:
-	python3.12 -m venv .venv
-	.venv/bin/pip install --upgrade pip
-	.venv/bin/pip install -r requirements.txt
-	.venv/bin/pip install -e ./tribev2
-	.venv/bin/pip install uv
+	docker compose up --build -d
 	@echo ""
-	@echo "Done. Run 'source .venv/bin/activate' to activate."
+	@echo "Done. App running at http://localhost:8000, MongoDB at localhost:27017"
 
 dev:
 	.venv/bin/uvicorn main:app --reload
