@@ -1,11 +1,11 @@
 import asyncio
+import shutil
 import tempfile
 from pathlib import Path
 
 from tribev2 import TribeModel
 from pymongo import AsyncMongoClient
 from dotenv import load_dotenv
-from service.file_upload import write_file_to_s3, upload_text_pipeline_files
 from service.text_processing import clean_text
 import os
 import logging
@@ -58,28 +58,22 @@ def predict_from_html(raw_html):
     model = _get_model()
     text = clean_text(raw_html)
     tmpdir = tempfile.mkdtemp()
-    tmp = Path(tmpdir) / "input.txt"
-    tmp.write_text(text)
-    df = model.get_events_dataframe(text_path=str(tmp))
-    preds, segments = model.predict(events=df)
-    return preds, segments, tmpdir
+    try:
+        tmp = Path(tmpdir) / "input.txt"
+        tmp.write_text(text)
+        # Use tmpdir as cache_folder so TRIBE writes TTS files here, isolated per request
+        model.cache_folder = tmpdir
+        df = model.get_events_dataframe(text_path=str(tmp))
+        preds, segments = model.predict(events=df)
+        return preds, segments
+    finally:
+        model.cache_folder = "./cache"
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
-def predict_from_video(video_path):
-    model = _get_model()
-    df = model.get_events_dataframe(video_path=video_path)
-    preds, segments = model.predict(events=df)
-    return preds, segments
 
 async def save_brain_analysis_results(source_name, user_id):
-    ext = Path(source_name).suffix.lower()
-    tmpdir = None
-    if ext in VIDEO_EXTENSIONS:
-        preds, segments = predict_from_video(source_name)
-        write_file_to_s3(user_id, source_name)
-    else:
-        preds, segments, tmpdir = predict_from_html(source_name)
-        upload_text_pipeline_files(user_id, source_name, tmpdir)
-    logging.info("[Brain Analysis] Files uploaded to S3.")
+    preds, segments = predict_from_html(source_name)
+    logging.info("[Brain Analysis] Predictions generated successfully.")
     await insert_data_to_db(preds, segments, source_name, user_id)
     logging.info("[Brain Analysis] Results saved to database.")
     return preds, segments
