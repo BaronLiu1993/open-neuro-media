@@ -1,4 +1,4 @@
-# Neuro
+# Recommendation Engine Built Using TRIBE v2: A Predictive Foundation Model
 
 Brain activity prediction from video, audio, and text using Meta's TRIBE v2 model. Includes an HTML purification pipeline for cleaning scraped web content.
 

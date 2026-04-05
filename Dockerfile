@@ -14,9 +14,13 @@ RUN pip install --no-cache-dir uv
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install tribev2 as editable package
-COPY tribev2/ tribev2/
+# Install tribev2 deps first (cached unless pyproject.toml changes)
+COPY tribev2/pyproject.toml tribev2/
+COPY tribev2/tribev2/__init__.py tribev2/tribev2/__init__.py
 RUN pip install --no-cache-dir -e ./tribev2
+
+# Copy tribev2 source (changes here won't re-install deps)
+COPY tribev2/ tribev2/
 
 # Copy application code
 COPY main.py .

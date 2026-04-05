@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
-
 class TestPredictFromHtml:
     @patch("service.brain_analysis.shutil.rmtree")
     @patch("service.brain_analysis.clean_text", return_value="cleaned text")

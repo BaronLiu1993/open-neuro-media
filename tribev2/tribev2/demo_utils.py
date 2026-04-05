@@ -245,6 +245,7 @@ class TribeModel(TribeExperiment):
 
     def get_events_dataframe(
         self,
+        text: str | None = None,
         text_path: str | None = None,
         audio_path: str | None = None,
         video_path: str | None = None,
@@ -253,6 +254,9 @@ class TribeModel(TribeExperiment):
 
         Parameters
         ----------
+        text:
+            Raw text string. Converted to speech, then transcribed back
+            to produce word-level events. No file needed.
         text_path:
             Path to a ``.txt`` file. The text is converted to speech, then
             transcribed back to produce word-level events.
@@ -272,7 +276,7 @@ class TribeModel(TribeExperiment):
         Raises
         ------
         ValueError
-            If zero or more than one path is provided, or if the file
+            If zero or more than one input is provided, or if the file
             extension does not match the expected suffixes.
         FileNotFoundError
             If the specified file does not exist.
@@ -280,6 +284,7 @@ class TribeModel(TribeExperiment):
         provided = {
             name: value
             for name, value in [
+                ("text", text),
                 ("text_path", text_path),
                 ("audio_path", audio_path),
                 ("video_path", video_path),
@@ -288,9 +293,17 @@ class TribeModel(TribeExperiment):
         }
         if len(provided) != 1:
             raise ValueError(
-                f"Exactly one of text_path, audio_path, video_path must be "
+                f"Exactly one of text, text_path, audio_path, video_path must be "
                 f"provided, got: {list(provided.keys()) or 'none'}"
             )
+
+        if text is not None:
+            if not text.strip():
+                raise ValueError("Text string is empty")
+            return TextToEvents(
+                text=text,
+                infra={"folder": self.cache_folder, "mode": "retry"},
+            ).get_events()
 
         name, value = next(iter(provided.items()))
         path = Path(value)
@@ -304,11 +317,11 @@ class TribeModel(TribeExperiment):
             raise FileNotFoundError(f"{name} does not exist: {path}")
 
         if text_path is not None:
-            text = path.read_text(encoding="utf-8")
-            if not text.strip():
+            text_content = path.read_text(encoding="utf-8")
+            if not text_content.strip():
                 raise ValueError(f"Text file is empty: {path}")
             return TextToEvents(
-                text=text,
+                text=text_content,
                 infra={"folder": self.cache_folder, "mode": "retry"},
             ).get_events()
 

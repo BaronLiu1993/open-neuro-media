@@ -14,7 +14,7 @@ services:
 
   worker:
     build: .
-    command: celery -A analysis_queue.analysis_worker worker --loglevel=info
+    command: celery -A analysis_queue.analysis_worker worker --pool=solo --loglevel=info
     depends_on:
       - mongo
       - rabbitmq
