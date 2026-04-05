@@ -7,10 +7,11 @@ router = APIRouter(
     tags=["analysis"],
 )
 
-@router.post("/process")
-async def process_text(req: AnalysisRequest):
+@router.post("/brain")
+async def process_brain_analysis_endpoint(req: AnalysisRequest):
     try:
         task = process_brain_analysis.delay(req.html, req.user_id)
         return {"status": "queued", "task_id": task.id}
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))

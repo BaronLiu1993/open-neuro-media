@@ -3,8 +3,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from tribev2 import TribeModel
 from pymongo import AsyncMongoClient
+from tribev2.tribev2 import TribeModel
 from dotenv import load_dotenv
 from service.text_processing import clean_text
 import os
@@ -77,7 +77,3 @@ async def save_brain_analysis_results(source_name, user_id):
     await insert_data_to_db(preds, segments, source_name, user_id)
     logging.info("[Brain Analysis] Results saved to database.")
     return preds, segments
-
-if __name__ == "__main__":
-    preds, segments = asyncio.run(save_brain_analysis_results("/Users/baronliu/Desktop/project/neuro/service/test/news.mp4", "user123"))
-    print(preds)

@@ -21,9 +21,9 @@ RUN pip install --no-cache-dir -e ./tribev2
 # Copy application code
 COPY main.py .
 COPY service/ service/
-COPY queue/ queue/
 COPY analysis_queue/ analysis_queue/
 COPY router/ router/
+COPY schema/ schema/
 COPY tests/ tests/
 
 EXPOSE 8000

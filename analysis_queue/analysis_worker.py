@@ -11,7 +11,8 @@ logging.basicConfig(level=logging.INFO)
 def process_brain_analysis(self, source_name, user_id):
     logging.info(f"[Worker] Processing: {source_name} for {user_id}")
     try:
-        asyncio.run(save_brain_analysis_results(source_name, user_id))
+        pred, segments = asyncio.run(save_brain_analysis_results(source_name, user_id))
+        print(pred)
         logging.info(f"[Worker] Completed: {source_name} for {user_id}")
     except Exception as e:
         logging.error(f"[Worker] Failed: {source_name} for {user_id} - {e}")
