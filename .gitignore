@@ -12,3 +12,4 @@ build/
 *.tsv
 cache/
 .vscode
+.DS_Store
